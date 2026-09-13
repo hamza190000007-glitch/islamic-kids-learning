@@ -1,45 +1,43 @@
 name: بناء APK
 
-# يعمل تلقائياً عند رفع كود إلى main، وأيضاً يمكن تشغيله يدوياً من تبويب Actions
 on:
   push:
     branches: [ main ]
-  workflow_dispatch: {}
+  workflow_dispatch:
 
 jobs:
   build-apk:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) سحب الكود من المستودع
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2) تثبيت Java (مطلوب لبناء أندرويد)
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: '17'
 
-      # 3) تثبيت Flutter SDK
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.24.0'
-          channel: 'stable'
+          channel: stable
 
-      # 4) تنزيل الحزم (packages) الخاصة بالمشروع
+      # الدخول إلى مجلد مشروع Flutter
       - name: Get dependencies
+        working-directory: islamic_kids_learning (1)/islamic_kids_learning
         run: flutter pub get
 
-      # 5) بناء ملف APK بصيغة release
+      # بناء APK
       - name: Build APK
+        working-directory: islamic_kids_learning (1)/islamic_kids_learning
         run: flutter build apk --release
 
-      # 6) رفع ملف APK كـ "Artifact" يمكن تحميله من صفحة التشغيل
+      # رفع APK
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: islamic-kids-learning-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: islamic_kids_learning (1)/islamic_kids_learning/build/app/outputs/flutter-apk/app-release.apk
