@@ -27,6 +27,15 @@ jobs:
           channel: stable
           cache: true
 
+      - name: فحص المشروع
+        run: |
+          echo "المجلد الحالي:"
+          pwd
+          echo "الملفات:"
+          ls -la
+          echo "pubspec:"
+          find . -name pubspec.yaml
+
       - name: تحميل الحزم
         run: flutter pub get
 
@@ -38,3 +47,4 @@ jobs:
         with:
           name: islamic-kids-learning-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
