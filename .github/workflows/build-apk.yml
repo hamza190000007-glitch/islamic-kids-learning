@@ -18,8 +18,6 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      # استخدم نسخة Flutter ثابتة بدل الاعتماد على أحدث stable
-      # لتجنب فشل تنزيل/حل نسخة Flutter في flutter-action.
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -42,6 +40,8 @@ jobs:
           cp -R lib _android_build/lib
           cp pubspec.yaml _android_build/pubspec.yaml
           if [ -d assets ]; then cp -R assets _android_build/assets; fi
+          # احذف اختبار Flutter الافتراضي لأنه يبحث عن MyApp غير الموجود في تطبيقنا
+          rm -rf _android_build/test
 
       - name: Set app name
         shell: bash
