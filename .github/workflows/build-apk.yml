@@ -18,11 +18,19 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      # استخدم نسخة Flutter ثابتة بدل الاعتماد على أحدث stable
+      # لتجنب فشل تنزيل/حل نسخة Flutter في flutter-action.
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
+          flutter-version: '3.35.7'
           channel: stable
-          cache: true
+          cache: false
+
+      - name: Verify Flutter
+        run: |
+          flutter --version
+          dart --version
 
       - name: Create clean Android project
         shell: bash
