@@ -1,0 +1,50 @@
+name: بناء APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Create clean Android project
+        shell: bash
+        run: |
+          set -e
+          rm -rf _android_build
+          flutter create --platforms=android --project-name islamic_kids_learning _android_build
+          rm -rf _android_build/lib
+          cp -R lib _android_build/lib
+          cp pubspec.yaml _android_build/pubspec.yaml
+      - name: Set app name
+        shell: bash
+        run: sed -i 's/android:label="[^"]*"/android:label="تعلّم وابتسم"/' _android_build/android/app/src/main/AndroidManifest.xml || true
+      - name: Get packages
+        working-directory: _android_build
+        run: flutter pub get
+      - name: Analyze
+        working-directory: _android_build
+        run: flutter analyze
+      - name: Build APK
+        working-directory: _android_build
+        run: flutter build apk --release
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: islamic-kids-learning-apk
+          path: _android_build/build/app/outputs/flutter-apk/app-release.apk
