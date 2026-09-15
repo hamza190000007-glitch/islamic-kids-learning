@@ -99,3 +99,4 @@ class _AiFriendPageState extends State<AiFriendPage> {
 
 p.write_text(s, encoding='utf-8')
 print('main.dart fixed')
+# Triggered intentionally to run the source-fix workflow.
