@@ -7,6 +7,13 @@ flutter create --platforms=android --project-name islamic_kids_learning $temp
 Remove-Item (Join-Path $temp 'lib') -Recurse -Force
 Copy-Item (Join-Path $root 'lib') (Join-Path $temp 'lib') -Recurse
 Copy-Item (Join-Path $root 'pubspec.yaml') (Join-Path $temp 'pubspec.yaml') -Force
+if (Test-Path (Join-Path $root 'assets')) { Copy-Item (Join-Path $root 'assets') (Join-Path $temp 'assets') -Recurse }
+$manifest = Join-Path $temp 'android/app/src/main/AndroidManifest.xml'
+if (Test-Path $manifest) {
+  $m = Get-Content $manifest -Raw
+  $m = $m -replace 'android:label="[^"]*"', 'android:label="طفلي المسلم"'
+  Set-Content $manifest $m -Encoding UTF8
+}
 $backup = Join-Path $root '_backup_before_android_fix'
 if (Test-Path $backup) { Remove-Item $backup -Recurse -Force }
 New-Item -ItemType Directory -Path $backup | Out-Null
