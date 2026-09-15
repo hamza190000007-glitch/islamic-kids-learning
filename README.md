@@ -15,3 +15,5 @@
 
 ## بناء APK
 يوجد GitHub Actions في `.github/workflows/build-apk.yml` لبناء APK عند الدفع إلى `main`.
+
+تم إدراج النسخة المعدلة الكاملة في `lib/main.dart` وتجهيزها للبناء.
