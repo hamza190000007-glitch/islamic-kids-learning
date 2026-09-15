@@ -146,13 +146,21 @@ jobs:
           if [ -d assets ]; then cp -R assets _android_build/assets; fi
           rm -rf _android_build/test
 
-      - name: Set app name
+      - name: Set app name and internet permission
         shell: bash
-        run: sed -i 's/android:label="[^"]*"/android:label="طفلي المسلم"/' _android_build/android/app/src/main/AndroidManifest.xml || true
+        run: |
+          sed -i 's/android:label="[^"]*"/android:label="طفلي المسلم"/' _android_build/android/app/src/main/AndroidManifest.xml || true
+          sed -i '/<manifest /a\    <uses-permission android:name="android.permission.INTERNET" />' _android_build/android/app/src/main/AndroidManifest.xml
 
       - name: Get packages
         working-directory: _android_build
         run: flutter pub get
+
+      - name: Verify resolved audio package
+        working-directory: _android_build
+        shell: bash
+        run: |
+          flutter pub deps | grep -E '^\s*audiplayers|^\s*audioplayers' || true
 
       - name: Generate launcher icon
         working-directory: _android_build
