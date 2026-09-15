@@ -102,18 +102,13 @@ class Voice {
     } else {
       // Syrian Arabic when the device provides it; otherwise use the clearest
       // Arabic voice supplied by the Android text-to-speech engine.
-      final langs = (await tts.getLanguages()).map((e) => e.toString().toLowerCase()).toList();
-      String lang = 'ar-SY';
-      if (!langs.any((x) => x == 'ar-sy' || x.contains('ar-sy'))) {
-        if (langs.any((x) => x.contains('ar-lb'))) {
-          lang = 'ar-LB';
-        } else if (langs.any((x) => x.contains('ar-jo'))) {
-          lang = 'ar-JO';
-        } else {
-          lang = 'ar-SA';
-        }
+      try {
+        await tts.setLanguage('ar-SY');
+      } catch (_) {
+        try {
+          await tts.setLanguage('ar-SA');
+        } catch (_) {}
       }
-      await tts.setLanguage(lang);
     }
     await tts.stop();
     await tts.speak(text);
@@ -659,6 +654,69 @@ class _IslamicLessonState extends State<IslamicLesson> {
       ),
     );
   }
+}
+
+class AiFriendPage extends StatefulWidget {
+  const AiFriendPage({super.key, required this.child});
+  final Child child;
+  @override
+  State<AiFriendPage> createState() => _AiFriendPageState();
+}
+
+class _AiFriendPageState extends State<AiFriendPage> {
+  final controller = TextEditingController();
+  final messages = <Map<String, String>>[
+    {'role': 'assistant', 'text': 'مرحباً! أنا نور 🌟 اسألني أي سؤال مناسب للأطفال.'},
+  ];
+  bool loading = false;
+  String endpoint = '';
+  @override
+  void initState() { super.initState(); _loadEndpoint(); }
+  Future<void> _loadEndpoint() async {
+    final value = await AppStore.loadAiEndpoint();
+    if (mounted) setState(() => endpoint = value);
+  }
+  @override
+  void dispose() { controller.dispose(); super.dispose(); }
+  Future<void> send() async {
+    final question = controller.text.trim();
+    if (question.isEmpty || loading) return;
+    controller.clear();
+    setState(() { messages.add({'role': 'user', 'text': question}); loading = true; });
+    final answer = await AiFriendService.ask(question, endpoint: endpoint);
+    if (!mounted) return;
+    setState(() { messages.add({'role': 'assistant', 'text': answer}); loading = false; });
+    await Voice.speak(answer);
+  }
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text('صديقي نور'), backgroundColor: burgundy, foregroundColor: Colors.white),
+    body: Column(children: [
+      const SizedBox(height: 12),
+      const FriendAvatar(size: 135, girl: true),
+      const Text('نور 🌟', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: burgundy)),
+      const Text('صديقك الذي يساعدك على التعلم', style: TextStyle(fontSize: 17)),
+      const SizedBox(height: 8),
+      Expanded(child: ListView.builder(
+        padding: const EdgeInsets.all(14),
+        itemCount: messages.length,
+        itemBuilder: (context, i) {
+          final m = messages[i];
+          final isUser = m['role'] == 'user';
+          return Align(alignment: isUser ? Alignment.centerRight : Alignment.centerLeft, child: Card(
+            color: isUser ? const Color(0xFFE8F1F7) : Colors.white,
+            child: Padding(padding: const EdgeInsets.all(14), child: Text(m['text'] ?? '', style: const TextStyle(fontSize: 18))),
+          ));
+        },
+      )),
+      if (loading) const Padding(padding: EdgeInsets.all(6), child: Text('نور يفكر... 💭')),
+      SafeArea(child: Padding(padding: const EdgeInsets.all(10), child: Row(children: [
+        Expanded(child: TextField(controller: controller, textInputAction: TextInputAction.send, onSubmitted: (_) => send(), decoration: const InputDecoration(hintText: 'اكتب سؤالك يا بطل...', border: OutlineInputBorder()))),
+        const SizedBox(width: 8),
+        FilledButton(onPressed: loading ? null : send, child: const Icon(Icons.send)),
+      ]))),
+    ]),
+  );
 }
 
 class RewardsPage extends StatefulWidget { const RewardsPage({super.key,required this.child}); final Child child; @override State<RewardsPage> createState()=>_RewardsPageState(); }
