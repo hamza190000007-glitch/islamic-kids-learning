@@ -23,10 +23,9 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  assets:
-    - assets/images/children_logo.png
-    - assets/icon/app_icon.png
-
+ assets:
+    - assets/images/
+    - assets/icon/
 flutter_launcher_icons:
   android: true
   ios: false
